@@ -3,6 +3,7 @@
             [pluto.reader :as reader]
             [pluto.storage :as storage]
             [pluto.storage.http :as http]
+            [pluto.storage.ipfs :as ipfs]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [re-frame.loggers :as re-frame.loggers]
@@ -47,9 +48,23 @@
      ^{:key 1} [header]
      ^{:key 2} o]))
 
+(defn wrap-extensions [os]
+  (fn []
+    [:div
+     (for [o os]
+       ^{:key o} [:div
+                  [:h2 (:name o)]
+                  [:p (:content o)]])]))
+
 (defn ^:export run
   []
   (re-frame/clear-subscription-cache!)
+
+  (storage/fetch (ipfs/IPFSStorage. "http://localhost:8080")
+    {:id "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG" :URL "/demo.edn"}
+    #(->> %
+         wrap-extensions
+         render))
 
   (storage/fetch (http/HTTPStorage.)
     {:URL "/demo.edn"}
