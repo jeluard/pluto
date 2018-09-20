@@ -94,6 +94,26 @@
                                    {:query :get-in}
                                    {:capacities {:queries #{:get-in}}}
                                    {}))))
+
+  (testing "Function"
+    (is (= {:errors [{:pluto.reader.errors/type  ::errors/invalid-property-name
+                      :pluto.reader.errors/value :function}]}
+           (hooks/resolve-property {:type :function :name :function}
+                                   {}
+                                   {:capacities {}}
+                                   {})))
+    (is (= {:errors [{:pluto.reader.errors/type  ::errors/function-not-exposed
+                      :pluto.reader.errors/value '+}]}
+           (hooks/resolve-property {:type :function :name :function}
+                                   {:function '+}
+                                   {:capacities {:functions #{}}}
+                                   {})))
+    (is (= {:data +}
+           (hooks/resolve-property {:type :function :name :function}
+                                   {:function '+}
+                                   {:capacities {:functions {'+ +}}}
+                                   {}))))
+  
   (testing "Set"
     (is (= {:data :one} (hooks/resolve-property {:name :keyword :type {:one-of #{:one :two :three}}} {:keyword :one} {} {})))
     (is (= {:errors [{::errors/type  ::errors/invalid-property-value

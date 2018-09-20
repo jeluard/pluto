@@ -60,6 +60,9 @@
 (defmethod resolve-property :query [def hook {:keys [capacities]} _]
   (resolve-capacities-value :queries ::errors/query-not-exposed capacities def hook))
 
+(defmethod resolve-property :function [def hook {:keys [capacities]} _]
+  (resolve-capacities-value :functions ::errors/function-not-exposed capacities def hook)) 
+
 (defn- resolve-property-value [f {:keys [name optional?]} hook]
   (if-let [o (get hook name)]
     (if (f o)

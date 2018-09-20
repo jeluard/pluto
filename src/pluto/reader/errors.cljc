@@ -22,7 +22,8 @@
                    ::forbidden-write-path
                    ::query-not-exposed
                    ::invalid-event-handler
-                   ::event-not-exposed})
+                   ::event-not-exposed
+                   ::function-not-exposed})
 
 (spec/def ::value any?)
 
