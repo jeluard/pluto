@@ -23,6 +23,7 @@
                    ::unknown-query
                    ::unknown-event
                    ::invalid-view
+                   ::invalid-property-map                   
                    ::invalid-block
                    ::unsupported-test-type})
 

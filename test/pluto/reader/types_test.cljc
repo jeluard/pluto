@@ -84,11 +84,11 @@
   (is (= {:data {:students [{:firstname "John" :lastname "Doe"}]}}
          (types/resolve {} {} {:students [{:firstname :string :lastname :string :name? :string}]}
                               {:students [{:firstname "John" :lastname "Doe"}]})))
-  (is (= '[text nil]
+  (is (= '[text]
          (let [m (types/resolve {} '{views/screen [text]} {:screen :view :students [{:firstname :string :lastname :string :name? :string}]}
                                    {:screen ['screen] :students [{:firstname "John" :lastname "Doe"}]})]
            ((get-in m [:data :screen]) {}))))
-  (is (= '[text nil]
+  (is (= '[text]
          (let [m (types/resolve {} '{views/screen [text]} {:screen? :view :students [{:firstname :string :lastname :string :name? :string}]}
                                    {:screen ['screen] :students [{:firstname "John" :lastname "Doe" :name "Henry"}]})]
            ((get-in m [:data :screen]) {}))))

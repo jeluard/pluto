@@ -61,3 +61,20 @@
   (is (= {:errors [{::errors/type  ::errors/unknown-reference,
                     ::errors/value {:value 'views/unknown}}]}
          (types/resolve {:capacities {:components {'text {:value :text}}}} {'views/main ['text "Hello"]} :view ['views/unknown]))))
+
+(deftest invalid-view-element-spec-errors
+  (letfn [(p [view] (views/parse
+                     {:capacities {:components {'text {:properties {:asdf :string}
+                                                       :value :text}}}}
+                     {}
+                     view))]
+    (is (:errors (p '[text :sadf])))
+    (is (:errors (p '[text {} {}])))
+
+    (is (not (:errors (p '[text [text]]))))
+    (is (not (:errors (p '[text {} 1 2 3 4 asdf]))))
+
+    (is (:errors (p '[text {asdf "asdf"}]))))
+
+  )
+

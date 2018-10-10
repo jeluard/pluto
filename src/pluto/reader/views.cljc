@@ -19,6 +19,8 @@
    :element vector?
    :block   list?))
 
+(spec/def ::property-map (spec/map-of keyword? any?))
+
 (spec/def ::element
   (spec/cat
    :tag      (spec/or :symbol symbol? :fn fn?)
@@ -61,19 +63,22 @@
     {:data v}))
 
 (defn- resolve-component-properties [ctx ext component properties]
-  (reduce-kv (fn [acc k v]
-               (let [{:keys [data errors]} (resolve-property ctx ext component k v)]
-                 (errors/merge-errors (update acc :data assoc k data)
-                                      errors)))
-             {:data   {}
-              :errors []}
-             properties))
+  (if-let [explain (spec/explain-data ::property-map properties)]
+    {:errors [(errors/error ::errors/invalid-property-map properties {:explain-data explain})]}
+    (reduce-kv (fn [acc k v]
+                 (let [{:keys [data errors]} (resolve-property ctx ext component k v)]
+                   (errors/merge-errors (update acc :data assoc k data)
+                                        errors)))
+               {:data   {}
+                :errors []}
+               properties)))
 
 (defn- resolve-properties-children [[properties? & children]]
   [(and (map? properties?) properties?)
-   (if (map? properties?)
-     children
-     (cons properties? children))])
+   (cond
+     (map? properties?) children
+     (not (nil? properties?)) (cons properties? children)
+     :else children)])
 
 (defn- parse-hiccup-element [ctx ext o]
   (let [explain
