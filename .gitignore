@@ -14,3 +14,4 @@ resources/public/js/
 website/build/
 website/static/js/
 website/static/extensions/
+\.\#*
