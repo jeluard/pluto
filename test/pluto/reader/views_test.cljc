@@ -68,13 +68,14 @@
                                                        :value :text}}}}
                      {}
                      view))]
-    (is (:errors (p '[text :sadf])))
-    (is (:errors (p '[text {} {}])))
-
+    (is (= (first-error-type (p '[text :sadf]))
+           :pluto.reader.errors/invalid-view))
+    (is (= (first-error-type (p '[text {} {}]))
+           :pluto.reader.errors/invalid-view))
+    
     (is (not (:errors (p '[text [text]]))))
     (is (not (:errors (p '[text {} 1 2 3 4 asdf]))))
 
-    (is (:errors (p '[text {asdf "asdf"}]))))
-
-  )
+    (is (= (first-error-type (p '[text {asdf "asdf"}]))
+           :pluto.reader.errors/invalid-property-map))))
 
