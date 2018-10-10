@@ -22,7 +22,7 @@
 (spec/def ::element
   (spec/cat
    :tag      (spec/or :symbol symbol? :fn fn?)
-   :attrs    map?
+   :attrs    (spec/? map?) 
    :children (spec/* ::form)))
 
 (declare parse)
