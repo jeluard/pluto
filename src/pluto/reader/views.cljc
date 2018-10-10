@@ -53,7 +53,7 @@
 
 (defn- resolve-component-property [ctx ext component k v]
   (or (resolve-default-component-properties k v)
-      (if-let [type (k (get-in ctx [:capacities :components component :properties]))]
+      (if-let [type (get-in ctx [:capacities :components component :properties k])]
         (types/resolve ctx ext type v)
         {:errors [(errors/error ::errors/unknown-component-property {:component component :property k})]})))
 
