@@ -13,16 +13,17 @@
 
 (spec/def ::form
   (spec/or
-    :string  string?
-    :number  number?
-    :symbol  symbol?
-    :element ::element))
+   :string  string?
+   :number  number?
+   :symbol  symbol?
+   :element vector?
+   :block   list?))
 
 (spec/def ::element
   (spec/cat
-    :tag      (spec/or :symbol symbol? :fn fn?)
-    :attrs    map?
-    :children (spec/* ::form)))
+   :tag      (spec/or :symbol symbol? :fn fn?)
+   :attrs    map?
+   :children (spec/* ::form)))
 
 (declare parse)
 
@@ -75,11 +76,14 @@
      (cons properties? children))])
 
 (defn- parse-hiccup-element [ctx ext o]
-  (let [explain (spec/explain-data ::form o)]
+  (let [explain
+        (if (vector? o) ;; this eliminates spec explain data noise
+          (spec/explain-data ::element o)
+          (spec/explain-data ::form o))]
     (cond
       ;; TODO Validate views, not hiccup
-      ;; (not (nil? explain))
-      ;; {:errors [(errors/error ::errors/invalid-view o {:explain-data explain})]}
+      (not (nil? explain))
+      {:errors [(errors/error ::errors/invalid-view o {:explain-data explain})]}
 
       (or (symbol? o) (utils/primitive? o)) {:data o}
 
