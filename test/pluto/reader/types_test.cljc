@@ -74,6 +74,9 @@
     (is (= {:errors [{::errors/type  ::errors/invalid-type-value
                       ::errors/value {:type :subset :value "value"}}]}
            (types/resolve {} {} #{"a" "b" "c"} "value")))
+    (is (= {:errors [{::errors/type  ::errors/invalid-type-value
+                      ::errors/value {:type :subset :value "value"}}]}
+           (types/resolve {} {} #{"a" "b" "c"} "value")))
     (is (= {:data #{"a"}}
            (types/resolve {} {} #{"a" "b" "c"} #{"a"}))))
   (testing "One of"
@@ -155,7 +158,20 @@
   (let [{:keys [data errors]} (types/resolve {:capacities {:events {'event {:value :event :arguments {:on-finished? :event}}}}}
                                              {} :event ['event {:on-finished ['event]}])]
     (is (not errors))
-    (is (fn? (:on-finished (last (data {} {})))))))
+    (is (fn? (:on-finished (last (data {} {}))))))
+  (let [{:keys [data errors]} (types/resolve {:capacities {:events {'alert {:value :alert :arguments {:value :string}}}}}
+                                             {'events/event '(let [{value :value} properties] [alert {:value value}])}
+                                             :event ['event {:value {:key "value"}}])]
+    (is (not errors))
+    (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}}))))  
+    
+  (let [{:keys [data errors]} (types/resolve {:capacities {:events {'alert {:value :alert :arguments {:value :string}}}}}
+                                             {'events/event '(let [{value :value} properties] [alert {:value value}])}
+                                             :event ['event])]
+    (is (not errors))
+    (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}}))))  
+  
+  )
 
 (deftest local-event?
   (is (types/local-event? '(let [{} properties] [alert {}]))))

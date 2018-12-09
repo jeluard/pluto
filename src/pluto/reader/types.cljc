@@ -68,7 +68,7 @@
     {:errors [(invalid-type-value :map value)]}))
 
 (defmethod resolve :subset [_ _ type value]
-  (if (and (not (nil? value)) (set/subset? value type))
+  (if (and (set? value) (set/subset? value type))
     {:data value}
     {:errors [(invalid-type-value :subset value)]}))
 
@@ -129,10 +129,11 @@
 (defn event-after-env [ctx ref data args bindings]
   (with-meta
     (fn [o env]
+      ;; env is the dispatched argument. Used has default but is overriden by the local arguments
       (let [env (merge env (keyword-map->symbol-map o)
                        (:data (destructuring/destructure bindings (merge o args (symbol-map->keyword-map env)))))
             dic (reduce-kv #(assoc %1 %2 (if (contains? env %3) (get env %3) %3)) {} env)]
-        [ref (:env ctx) (merge (symbol-map->keyword-map dic) (reduce-kv #(assoc %1 %2 (replace-atom dic  %3)) {} data) o)]))
+        [ref (:env ctx) (merge (symbol-map->keyword-map dic) (reduce-kv #(assoc %1 %2 (replace-atom dic %3)) {} data) o)]))
     {:event true}))
 
 (defn- event-reference-with-arguments [ctx ext ref event arguments args bindings]
