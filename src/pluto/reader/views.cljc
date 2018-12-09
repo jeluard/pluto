@@ -35,10 +35,12 @@
 (defn component? [o]
   (symbol? o))
 
-(defn- resolve-component [ctx o]
+(defn- resolve-component [ctx ext [element :as o]]
   (cond
-    (fn? o) o ;; TODO better abstract blocks
-    (symbol? o) (get-in ctx [:capacities :components o :value])))
+    (fn? element) element ;; TODO better abstract blocks
+    (symbol? element) (or (get-in ctx [:capacities :components element :value])
+                          ; First resolve using default components then lookup for local views
+                          (:data (types/resolve ctx ext :view o)))))
 
 (defmulti resolve-default-component-properties
   "Resolve default properties available for all components."
@@ -102,7 +104,7 @@
       (vector? o)
       (let [[element & properties-children]  o
             [properties children]            (resolve-properties-children properties-children)
-            component                        (resolve-component ctx element)
+            component                        (resolve-component ctx ext o)
             {:keys [data errors]}            (when properties
                                                (resolve-component-properties ctx ext element properties))]
         (cond-> (let [m (parse-hiccup-children ctx ext children)]
@@ -125,8 +127,7 @@
 
 (defn parse [ctx ext o]
   (if (list? o) ;; TODO introduce a block? fn
-    (let [{:keys [data errors] :as m} (blocks/parse ctx ext o)
-          ]
+    (let [{:keys [data errors] :as m} (blocks/parse ctx ext o)]
       (if data
         (let [d (parse ctx ext data)
               props (reduce unresolved-properties #{} d)]
