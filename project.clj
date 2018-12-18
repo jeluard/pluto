@@ -21,4 +21,14 @@
                                    :cache-analysis false
                                    :target :nodejs
                                    :main "pluto.demo"
-                                   :pretty-print true}}]})
+                                   :pretty-print true}}
+                       {:id "nodejs"
+                        :source-paths ["src"]
+                        :figwheel true
+                        :compiler {:main pluto.js
+                                   :output-to "target/nodejs/reader.js"
+                                   :output-dir "target/nodejs/out"
+                                   :target :nodejs
+                                   :optimizations :advanced
+                                   :pretty-print true
+                                   :source-map "target/nodejs/reader.map.js"}}]})
