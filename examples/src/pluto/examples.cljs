@@ -5,6 +5,7 @@
             [pluto.reader          :as reader]
             [pluto.reader.hooks    :as hooks]
             [pluto.storages        :as storages]
+            pluto.reader.views
             [reagent.core          :as reagent]
             [reagent.dom           :as dom]
             [re-frame.core         :as re-frame]
@@ -35,7 +36,7 @@
 
 (re-frame/reg-fx
   ::identity
-  (fn [{:keys [cb]}] (re-frame/dispatch (cb {}))))
+  (fn [{:keys [cb]}] (re-frame/dispatch (cb {:value "Yeahhh"}))))
 
 (re-frame/reg-event-fx
   :identity

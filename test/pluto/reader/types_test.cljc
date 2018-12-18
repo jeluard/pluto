@@ -164,13 +164,6 @@
                                              :event ['event {:value {:key "value"}}])]
     (is (not errors))
     (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}}))))  
-    
-  (let [{:keys [data errors]} (types/resolve {:capacities {:events {'alert {:value :alert :arguments {:value :string}}}}}
-                                             {'events/event '(let [{value :value} properties] [alert {:value value}])}
-                                             :event ['event])]
-    (is (not errors))
-    (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}}))))  
-  
   )
 
 (deftest local-event?

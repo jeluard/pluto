@@ -126,14 +126,16 @@
 (defn keyword-map->symbol-map [m]
   (reduce-kv #(assoc %1 (symbol (name %2)) %3) {} m))
 
-(defn event-after-env [ctx ref data args bindings]
+(defn event-after-env [ctx ref inline static bindings]
   (with-meta
-    (fn [o env]
+    (fn [dynamic env]
       ;; env is the dispatched argument. Used has default but is overriden by the local arguments
-      (let [env (merge env (keyword-map->symbol-map o)
-                       (:data (destructuring/destructure bindings (merge o args (symbol-map->keyword-map env)))))
-            dic (reduce-kv #(assoc %1 %2 (if (contains? env %3) (get env %3) %3)) {} env)]
-        [ref (:env ctx) (merge (symbol-map->keyword-map dic) (reduce-kv #(assoc %1 %2 (replace-atom dic %3)) {} data) o)]))
+      ;; Perform destructuring based on dynamic and static arguments
+      ;; Then resolve recursive properties in the aggregated env
+      ;; Final map is contains inline arguments resolved
+      (let [env' (reduce-kv #(assoc %1 %2 (if (contains? env %3) (get env %3) %3)) {}
+                            (merge env (:data (destructuring/destructure bindings (merge dynamic static)))))]
+        [ref (:env ctx) (reduce-kv #(assoc %1 %2 (replace-atom env' %3)) {} inline)]))
     {:event true}))
 
 (defn- event-reference-with-arguments [ctx ext ref event arguments args bindings]
