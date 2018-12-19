@@ -37,12 +37,11 @@
                         :source-paths ["src"]
                         :compiler {
                           :main                 pluto.js
-                          :target               nodejs
-                          :output-to            "target-cljs/cljsbuild/pluto.browser.js"
-                          :output-dir           "target-cljs/cljsbuild/js/out/dev"
+                          :output-to            "target/cljsbuild/browser/pluto.browser.js"
+                          :output-dir           "target/cljsbuild/browser/out"
                           :parallel-build       true 
                           :pretty-print         true
-                          :asset-path           "./js/out/dev" 
+                          :asset-path           "./out" 
                           :optimizations        :none
                           :verbose              false
                           :source-map           true
@@ -58,4 +57,25 @@
                                           :global-exports {react-dom ReactDOM}}
                                          {:file "https://unpkg.com/create-react-class@15.6.0-rc.0/create-react-class.min.js"
                                           :provides       ["create-react-class"]
-                                          :global-exports {create-react-class createReactClass}}]}}]})
+                                          :global-exports {create-react-class createReactClass}}]}}
+                       {:id                    "pluto.nodejs"
+                        :figwheel               true
+                        :source-paths ["src"]
+                        :compiler {
+                          :main                 pluto.js
+                          :target               :nodejs
+                          :output-to            "target/cljsbuild/nodejs/pluto.node.js"
+                          :output-dir           "target/cljsbuild/nodejs/out"
+                          :parallel-build       true 
+                          :pretty-print         true
+                          :asset-path           "./out" 
+                          :optimizations        :none
+                          :verbose              false
+                          :source-map           true
+                          :source-map-timestamp true
+                          :infer-externs        true
+                          :install-deps         false           
+                          :recompile-dependents true}}]})
+                          :npm-deps {:react "16.0.0"
+                                     :react-dom "16.0.0"
+                                     :create-react-class "15.6.0"}
