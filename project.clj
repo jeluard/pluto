@@ -26,9 +26,36 @@
                         :source-paths ["src"]
                         :figwheel true
                         :compiler {:main pluto.js
-                                   :output-to "target/nodejs/reader.js"
+                                   :output-to "target/nodejs/pluto.js"
                                    :output-dir "target/nodejs/out"
                                    :target :nodejs
                                    :optimizations :advanced
-                                   :pretty-print true
-                                   :source-map "target/nodejs/reader.map.js"}}]})
+                                   :pretty-print false
+                                   :source-map "target/nodejs/reader.map.js"}}                                  
+                       {:id                    "pluto.browser"
+                        :figwheel               true
+                        :source-paths ["src"]
+                        :compiler {
+                          :main                 pluto.js
+                          :target               nodejs
+                          :output-to            "target-cljs/cljsbuild/pluto.browser.js"
+                          :output-dir           "target-cljs/cljsbuild/js/out/dev"
+                          :parallel-build       true 
+                          :pretty-print         true
+                          :asset-path           "./js/out/dev" 
+                          :optimizations        :none
+                          :verbose              false
+                          :source-map           true
+                          :source-map-timestamp true
+                          :infer-externs        true
+                          :npm-deps             false
+                          :recompile-dependents false
+                          :foreign-libs [{:file "https://unpkg.com/react@16/umd/react.production.min.js"
+                                          :provides       ["react"]
+                                          :global-exports {react React}}
+                                         {:file "https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"
+                                          :provides       ["react-dom"]
+                                          :global-exports {react-dom ReactDOM}}
+                                         {:file "https://unpkg.com/create-react-class@15.6.0-rc.0/create-react-class.min.js"
+                                          :provides       ["create-react-class"]
+                                          :global-exports {create-react-class createReactClass}}]}}]})
