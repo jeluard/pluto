@@ -90,7 +90,13 @@
                       ::errors/value {:type :one-of :value "one"}}]}
            (types/resolve {} {} {:one-of #{:one :two :three}} "one")))
     (is (= {:data :one}
-           (types/resolve {} {} {:one-of #{:one :two :three}} :one)))))
+           (types/resolve {} {} {:one-of #{:one :two :three}} :one))))
+  (testing "Or"
+    (is (= {:errors [{::errors/type  ::errors/invalid-type-value
+                      ::errors/value {:type :or :value nil}}]}
+           (types/resolve {} {} {:or [:keyword #{:one :two :three}]} nil)))
+    (is (= {:data :one}
+           (types/resolve {} {} {:or [:keyword #{:one :two :three}]} :one)))))
 
 (deftest resolve-sequential
   (is (= {:errors [{::errors/type  ::errors/invalid-sequential-type
@@ -163,8 +169,8 @@
                                              {'events/event '(let [{value :value} properties] [alert {:value value}])}
                                              :event ['event {:value {:key "value"}}])]
     (is (not errors))
-    (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}}))))  
-  )
+    (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}})))))
+
 
 (deftest local-event?
   (is (types/local-event? '(let [{} properties] [alert {}]))))

@@ -18,14 +18,14 @@
     * data with the resolved data
     * errors encapsulating all errors generated during resolution"
   (fn [ctx ext type value]
-    (if (symbol? value)
-      :symbol
-      (cond
-        (keyword? type) type
-        (:one-of type)  :one-of
-        (set? type)     :subset
-        (map? type)     :assoc
-        (vector? type)  :sequence))))
+    (cond
+      (symbol? value) :symbol
+      (:one-of type)  :one-of
+      (:or type)      :or
+      (keyword? type) type
+      (set? type)     :subset
+      (map? type)     :assoc
+      (vector? type)  :sequence)))
 
 (defmethod resolve :symbol [_ _ _ value]
   ;; TODO properly validate symbols based on inferred type
@@ -72,15 +72,22 @@
     {:data value}
     {:errors [(invalid-type-value :subset value)]}))
 
+(defmethod resolve :sequence [ctx ext type value]
+  (if (and (vector? type) (= 1 (count type)) (map? (first type)))
+    (apply errors/merge-results-with #(conj (vec %1) %2) (map #(resolve ctx ext (first type) %) value))
+    {:errors [(errors/error ::errors/invalid-sequential-type {:type type :value value})]}))
+
 (defmethod resolve :one-of [_ _ {:keys [one-of]} value]
   (if-let [o (one-of value)]
     {:data o}
     {:errors [(invalid-type-value :one-of value)]}))
 
-(defmethod resolve :sequence [ctx ext type value]
-  (if (and (vector? type) (= 1 (count type)) (map? (first type)))
-    (apply errors/merge-results-with #(conj (vec %1) %2) (map #(resolve ctx ext (first type) %) value))
-    {:errors [(errors/error ::errors/invalid-sequential-type {:type type :value value})]}))
+(defmethod resolve :or [ctx ext {:keys [or]} value]
+  (if (coll? or)
+    (if-let [o (some #(when-let [{:keys [data]} (resolve ctx ext % value)] data) or)]
+      {:data o}
+      {:errors [(invalid-type-value :or value)]})
+    {:errors [(invalid-type-value :or value)]}))
 
 (def ^:private sentinel ::sentinel)
 
