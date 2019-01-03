@@ -1,22 +1,11 @@
-(ns pluto.examples
-  (:require [pluto.web.components  :as components]
-            pluto.web.events
-            pluto.web.queries
+(ns pluto.web.core
+  (:require [reagent.core          :as reagent]
             [pluto.reader          :as reader]
             [pluto.reader.hooks    :as hooks]
-            [pluto.storages        :as storages]
             pluto.reader.views
-            [reagent.core          :as reagent]
-            [reagent.dom           :as dom]
-            [re-frame.core         :as re-frame]
-            [re-frame.loggers      :as re-frame.loggers]))
-
-(def warn (js/console.warn.bind js/console))
-(re-frame.loggers/set-loggers!
-  {:warn (fn [& args]
-           (cond
-             (= "re-frame: overwriting" (first args)) nil
-             :else (apply warn args)))})
+            [pluto.web.components  :as components]
+            pluto.web.events
+            pluto.web.queries))
 
 (defn render [h el]
   (reagent/render (h {:name "Test Extension"
@@ -39,7 +28,17 @@
 
 (defn parse [m]
   (reader/parse {:env        {:id "Extension ID"}
-                 :capacities {:components components/all
+                 :capacities {:components
+                              {'view   {:properties {}
+                                        :value      components/view
+                                        :description ""
+                                        :examples   []}
+                               'button {:properties {:on-click :event}
+                                        :value      components/button
+                                        :examples   []}
+                               'text   {:properties {}
+                                        :value      components/text
+                                        :examples   []}}
                               :queries    {'random-boolean
                                            {:value :random-boolean}
                                            'identity
@@ -71,9 +70,3 @@
   (case type
     :error (set! (.-innerHTML el-errors) value)
     (read-extension value el el-errors)))
-
-(defn ^:export load-and-render
-  [s el el-errors]
-  (dom/unmount-component-at-node el)
-  (dom/unmount-component-at-node el-errors)
-  (storages/fetch s #(render-result % el el-errors)))
