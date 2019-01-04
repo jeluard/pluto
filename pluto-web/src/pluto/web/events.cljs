@@ -12,7 +12,7 @@
 
 (re-frame/reg-fx
   ::identity
-  (fn [{:keys [cb]}] (re-frame/dispatch (cb {}))))
+  (fn [{:keys [cb]}] (cb {})))
 
 (re-frame/reg-event-fx
   :identity

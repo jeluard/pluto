@@ -7,11 +7,6 @@
             [pluto.reader.types         :as types]
             [pluto.utils                :as utils]))
 
-(defn block? [o]
-      (and (list? o)
-           (symbol? (first o))
-           (map? (second o))))
-
 (defmulti parse
   "Parse a block element. Return hiccup data."
   (fn [ctx ext parent [type]] type))
@@ -75,12 +70,13 @@
   (let [[k v] bindings
         for-values (resolve-rhs prev-env v)]
     (when (sequential? for-values)
-      (apply array
-             (map reagent/as-element
-               (for [val for-values]
-                 ^{:key val}
-                 [let-block {:prev-env prev-env :bindings [k val]}
-                   children]))))))
+      #?(:cljs
+          (apply array
+                 (map reagent/as-element
+                   (for [val for-values]
+                     ^{:key val}
+                     [let-block {:prev-env prev-env :bindings [k val]}
+                       children])))))))
 
 (defn static-value? [v]
   (or (utils/primitive? v) (map? v)))

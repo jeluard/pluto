@@ -13,10 +13,10 @@
            (is (= {:data 1} (types/resolve {} {} :any 1))))
   (testing "String"
     (is (= {:errors [{::errors/type  ::errors/invalid-type-value
-                      ::errors/value {:type :string :value nil}}]}
+                      ::errors/value {:type :string :data nil}}]}
            (types/resolve {} {} :string nil)))
     (is (= {:errors [{::errors/type  ::errors/invalid-type-value
-                      ::errors/value {:type :string :value :value}}]}
+                      ::errors/value {:type :string :data :value}}]}
            (types/resolve {} {} :string :value)))
     (is (= {:data "value"}
            (types/resolve {} {} :string "value"))))
@@ -170,7 +170,3 @@
                                              :event ['event {:value {:key "value"}}])]
     (is (not errors))
     (is (= [:alert nil {:value {:key "value"}}] (data {} {:value {:key2 "value2"}})))))
-
-
-(deftest local-event?
-  (is (types/local-event? '(let [{} properties] [alert {}]))))

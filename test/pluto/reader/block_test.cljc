@@ -1,6 +1,6 @@
 (ns pluto.reader.block-test
   (:require [clojure.test :refer [is deftest testing]]
-            [pluto.reader :as reader]            
+            [pluto.core :as reader]
             [pluto.reader.errors :as errors]
             [pluto.reader.blocks :as blocks]
             [re-frame.core :as re-frame])

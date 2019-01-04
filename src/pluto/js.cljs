@@ -1,7 +1,7 @@
 (ns pluto.js
   "Exports reader function to JavaScript hosts.
    Type conversion is properly handled."
-  (:require [pluto.reader :as reader]))
+  (:require [pluto.core :as pluto]))
 
 (defn ^:export to-clj [o]
   (js->clj o))
@@ -14,108 +14,108 @@
 ;; TODO find a syntax so that :event can define associated types they will be injected
 
 (def ctx
-  {:capacities {:components {'view                   {:value component}
-                             'scroll-view            {:value component}
-                             'keyboard-avoiding-view {:value component}
-                             'text                   {:value component}
-                             'touchable-opacity      {:value component :properties {:on-press :event}}
-                             'icon                   {:value component :properties {:key :keyword :color :any}}
-                             'image                  {:value component :properties {:uri :string  :source :number}}
-                             'input                  {:value component :properties {:on-change :event :placeholder :string :keyboard-type :keyword :change-delay? :number :placeholder-text-color :any}}
-                             'button                 {:value component :properties {:enabled :boolean :disabled :boolean :on-click :event}}
-                             'link                   {:value component :properties {:uri :string}}
-                             'checkbox               {:value component :properties {:on-change? :event :checked? :boolean}}
-                             'activity-indicator     {:value component :properties {:animating :boolean :color :string :size :keyword :hides-when-stopped :boolean}}
-                             'list                   {:value component :properties {:data :vector :item-view :view :key? :keyword}}
-                             'picker                 {:value component :properties {:on-change :event :selected :string :enabled :boolean :data :vector}}
-                             'nft-token-viewer       {:value component :properties {:token :string}}
-                             'transaction-status     {:value component :properties {:outgoing :string :tx-hash :string}}
-                             'asset-selector         {:value component}
-                             'token-selector         {:value component}}
-                :queries {'wallet/token {:value :wallet/token :arguments {:token :string}}
-                          'wallet/tokens {:value :wallet/tokens :arguments {:filter :vector}}
-                          'wallet/balance {:value :wallet/balance :arguments {:token :string}}
-                          'wallet/collectibles {:value :get-collectible-token :arguments {:token :string :symbol :string}}
-                          'store/get {:value :store/get :arguments {:key :string}}}
+  {:capacities {:components {'view                   {:data component}
+                             'scroll-view            {:data component}
+                             'keyboard-avoiding-view {:data component}
+                             'text                   {:data component}
+                             'touchable-opacity      {:data component :properties {:on-press :event}}
+                             'icon                   {:data component :properties {:key :keyword :color :any}}
+                             'image                  {:data component :properties {:uri :string  :source :number}}
+                             'input                  {:data component :properties {:on-change :event :placeholder :string :keyboard-type :keyword :change-delay? :number :placeholder-text-color :any}}
+                             'button                 {:data component :properties {:enabled :boolean :disabled :boolean :on-click :event}}
+                             'link                   {:data component :properties {:uri :string}}
+                             'checkbox               {:data component :properties {:on-change? :event :checked? :boolean}}
+                             'activity-indicator     {:data component :properties {:animating :boolean :color :string :size :keyword :hides-when-stopped :boolean}}
+                             'list                   {:data component :properties {:data :vector :item-view :view :key? :keyword}}
+                             'picker                 {:data component :properties {:on-change :event :selected :string :enabled :boolean :data :vector}}
+                             'nft-token-viewer       {:data component :properties {:token :string}}
+                             'transaction-status     {:data component :properties {:outgoing :string :tx-hash :string}}
+                             'asset-selector         {:data component}
+                             'token-selector         {:data component}}
+                :queries {'wallet/token {:data :wallet/token :arguments {:token :string}}
+                          'wallet/tokens {:data :wallet/tokens :arguments {:filter :vector}}
+                          'wallet/balance {:data :wallet/balance :arguments {:token :string}}
+                          'wallet/collectibles {:data :get-collectible-token :arguments {:token :string :symbol :string}}
+                          'store/get {:data :store/get :arguments {:key :string}}}
                 :events     {'alert
                              {:permissions [:read]
-                              :value       :alert
-                              :arguments   {:value :string}}
+                              :data       :alert
+                              :arguments   {:data :string}}
                              'selection-screen
                              {:permissions [:read]
-                              :value       :extensions/show-selection-screen
+                              :data       :extensions/show-selection-screen
                               :arguments   {:items :vector :on-select :event :render :view :title :string :extractor-key :keyword}}
                              'log
                              {:permissions [:read]
-                              :value       :log
-                              :arguments   {:value :string}}
+                              :data       :log
+                              :arguments   {:data :string}}
                              'arithmetic
                              {:permissions [:read]
-                              :value       :extensions/arithmetic
+                              :data       :extensions/arithmetic
                               :arguments   {:values    :vector
                                             :operation {:one-of #{:plus :minus :times :divide}}
                                             :on-result :event}}
                              'schedule/start
                              {:permissions [:read]
-                              :value       :extensions/json-parse
+                              :data       :extensions/json-parse
                               :arguments   {:value      :event
                                             :interval   :number
                                             :on-created :event
                                             :on-result  :event}}
                              'schedule/cancel
                              {:permissions [:read]
-                              :value       :extensions/json-parse
+                              :data       :extensions/json-parse
                               :arguments   {:value      :number}}
                              'json/parse
                              {:permissions [:read]
-                              :value       :log
+                              :data       :log
                               :arguments   {:value :string}}
                              'chat.command/set-parameter
                              {:permissions [:read]
-                              :value       :store/put
+                              :data        :store/put
                               :arguments   {:value :string}}
                              'chat.command/set-custom-parameter
                              {:permissions [:read]
-                              :value       :store/put
+                              :data        :store/put
                               :arguments   {:key :keyword :value :string}}
                              'chat.command/set-parameter-with-custom-params
                              {:permissions [:read]
-                              :value       :store/put
+                              :data        :store/put
                               :arguments   {:value :string :params :map}}
                              'chat.command/send-message
                              {:permissions [:read]
-                              :value       :chat.command/send-message
+                              :data        :chat.command/send-message
                               :arguments   {:params :map}}
                              'chat.command/send-plain-text-message
                              {:permissions [:read]
-                              :value       :chat.command/send-message
+                              :data        :chat.command/send-message
                               :arguments   {:value :string}}
                              'store/put
                              {:permissions [:read]
-                              :value       :store/put
+                              :data        :store/put
                               :arguments   {:key :string :value :any}}
                              'store/puts
                              {:permissions [:read]
-                              :value       :store/puts
+                              :data        :store/puts
                               :arguments   {:value :vector}}
                              'store/append
                              {:permissions [:read]
-                              :value       :store/append
+                              :data        :store/append
                               :arguments   {:key :string :value :any}}
                              'store/clear
                              {:permissions [:read]
-                              :value       :store/put
+                              :data        :store/put
                               :arguments   {:key :string}}
                              'http/get
                              {:permissions [:read]
-                              :value       :http/get
+                              :data        :http/get
                               :arguments   {:url         :string
                                             :timeout?    :string
                                             :on-success  :event
                                             :on-failure? :event}}
                              'http/post
                              {:permissions [:read]
-                              :value       :http/post
+                              :data        :http/post
                               :arguments   {:url         :string
                                             :body        :string
                                             :timeout?    :string
@@ -123,19 +123,19 @@
                                             :on-failure? :event}}
                              'ipfs/cat
                              {:permissions [:read]
-                              :value       :ipfs/cat
+                              :data        :ipfs/cat
                               :arguments   {:hash        :string
                                             :on-success  :event
                                             :on-failure? :event}}
                              'ethereum/transaction-receipt
                              {:permissions [:read]
-                              :value       :extensions/ethereum-transaction-receipt
+                              :data        :extensions/ethereum-transaction-receipt
                               :arguments   {:value     :string
                                             :on-success  :event
                                             :on-failure? :event}}
                              'ethereum/send-transaction
                              {:permissions [:read]
-                              :value       :extensions/ethereum-send-transaction
+                              :data        :extensions/ethereum-send-transaction
                               :arguments   {:to         :string
                                             :gas?       :string
                                             :gas-price? :string
@@ -147,7 +147,7 @@
                                             :on-failure? :event}}
                              'ethereum/logs
                              {:permissions [:read]
-                              :value       :extensions/ethereum-logs
+                              :data        :extensions/ethereum-logs
                               :arguments   {:fromBlock? :string
                                             :toBlock?   :string
                                             :address?   :vector
@@ -157,7 +157,7 @@
                                             :on-failure? :event}}
                              'ethereum/call
                              {:permissions [:read]
-                              :value       :extensions/ethereum-call
+                              :data        :extensions/ethereum-call
                               :arguments   {:to         :string
                                             :method     :string
                                             :params?    :vector
@@ -179,4 +179,4 @@
                                                     :on-receive?   :event}}}}})
 
 (defn ^:export parse [m]
-  (reader/parse ctx (:data m)))
+  (pluto/parse ctx (:data m)))

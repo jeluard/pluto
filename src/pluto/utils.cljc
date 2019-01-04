@@ -19,11 +19,6 @@
              (.getMessage ^Throwable ex))
      :cljs (cljs.core/ex-message ex)))
 
-(defn atom?
-  [o]
-  #?(:clj  (instance? clojure.lang.IAtom o)
-     :cljs (instance? Atom o)))
-
 (defn primitive? [o]
   (or (boolean? o)
       (int? o)

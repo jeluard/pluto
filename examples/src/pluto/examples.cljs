@@ -2,8 +2,7 @@
   (:require [pluto.web.components  :as components]
             pluto.web.events
             pluto.web.queries
-            [pluto.reader          :as reader]
-            [pluto.reader.hooks    :as hooks]
+            [pluto.core            :as pluto]
             [pluto.storages        :as storages]
             [pluto.web.editor.markdown :as mk]
             pluto.reader.views
@@ -29,43 +28,47 @@
     [:div
      [:div "Errors"]
      (into [:ul]
-       (for [{:keys [type] :as m} v]
+       (for [[_ {type :type :as m}] v]
          [:li
           [:span [:b (str type)] (pr-str (dissoc m :type))]]))]))
 
-(def hook 
-  (reify hooks/Hook
-    (hook-in [_ id env {:keys [description scope parameters preview short-preview]} cofx])
-    (unhook [_ id env {:keys [scope]} {:keys [db] :as cofx}])))
+(defn dispatch-events [events]
+  (doseq [event events]
+    (re-frame/dispatch event)))
 
 (defn parse [m]
-  (reader/parse {:env        {:id "Extension ID"}
-                 :capacities {:components components/all
-                              :queries    {'random-boolean
-                                           {:value :random-boolean}
-                                           'identity
-                                           {:value :extensions/identity :arguments {:value :map}}}
-                              :hooks      {:main
-                                           {:hook       hook
-                                            :properties {:view :view}}}
-                              :events     {'identity
-                                           {:permissions [:read]
-                                            :value       :identity
-                                            :arguments   {:cb :event}}
-                                           'alert
-                                           {:permissions [:read]
-                                            :value       :alert
-                                            :arguments   {:value :string}}}}}
-                m))
+  (pluto/parse {:env        {:id       "Extension ID"
+                             :logger   nil
+                             :event-fn dispatch-events
+                             :query-fn nil}
+                :capacities {:components components/all
+                             :queries    {'random-boolean
+                                          {:data :random-boolean}
+                                          'identity
+                                          {:data      :extensions/identity
+                                           :arguments {:value :map}}}
+                             :hooks      {:main
+                                          {:properties {:view :view}}}
+                             :events     {'identity
+                                          {:permissions [:read]
+                                           :data        :identity
+                                           :arguments   {:cb :event}}
+                                          'alert
+                                          {:permissions [:read]
+                                           :data        :alert
+                                           :arguments   {:value :string}}}}}
+               m))
 
 (defn render-extension [m el el-errors]
   (let [{:keys [data errors]} (parse m)]
     (when errors
       (render (errors-list errors) el-errors))
-    (render (get-in data [:hooks :main :demo :parsed :view]) el)))
+    (if-let [view (get-in data [:hooks :main.demo :view])]
+      (render view el)
+      (render (fn [] [:div "Oups"]) el))))
 
 (defn read-extension [o el el-errors]
-  (let [{:keys [data errors]} (reader/read (:content o))]
+  (let [{:keys [data errors]} (pluto/read (:content o))]
     (render-extension data el el-errors)))
 
 (defn render-result [{:keys [type value]} el el-errors]

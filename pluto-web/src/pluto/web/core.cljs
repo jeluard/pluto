@@ -1,7 +1,6 @@
 (ns pluto.web.core
   (:require [reagent.core          :as reagent]
-            [pluto.reader          :as reader]
-            [pluto.reader.hooks    :as hooks]
+            [pluto.core            :as pluto]
             pluto.reader.views
             [pluto.web.components  :as components]
             pluto.web.events
@@ -21,40 +20,37 @@
          [:li
           [:span [:b (str type)] (pr-str (dissoc m :type))]]))]))
 
-(def hook 
-  (reify hooks/Hook
-    (hook-in [_ id env {:keys [description scope parameters preview short-preview]} cofx])
-    (unhook [_ id env {:keys [scope]} {:keys [db] :as cofx}])))
-
 (defn parse [m]
-  (reader/parse {:env        {:id "Extension ID"}
-                 :capacities {:components
-                              {'view   {:properties {}
-                                        :value      components/view
-                                        :description ""
-                                        :examples   []}
-                               'button {:properties {:on-click :event}
-                                        :value      components/button
-                                        :examples   []}
-                               'text   {:properties {}
-                                        :value      components/text
-                                        :examples   []}}
-                              :queries    {'random-boolean
-                                           {:value :random-boolean}
-                                           'identity
-                                           {:value :extensions/identity :arguments {:value :map}}}
-                              :hooks      {:main
-                                           {:hook       hook
-                                            :properties {:view :view}}}
-                              :events     {'identity
-                                           {:permissions [:read]
-                                            :value       :identity
-                                            :arguments   {:cb :event}}
-                                           'alert
-                                           {:permissions [:read]
-                                            :value       :alert
-                                            :arguments   {:value :string}}}}}
-                m))
+  (pluto/parse {:env        {:id "Extension ID"}
+                :capacities {:components
+                             {'view   {:properties {}
+                                       :data       components/view
+                                       :description ""
+                                       :examples   []}
+                              'button {:properties {:on-click :event}
+                                       :data       components/button
+                                       :examples   []}
+                              'text   {:properties {}
+                                       :data       components/text
+                                       :examples   []}}
+                             :queries
+                             {'random-boolean
+                              {:data :random-boolean}
+                              'identity
+                              {:data :extensions/identity :arguments {:value :map}}}
+                             :hooks
+                             {:main
+                              {:properties {:view :view}}}
+                             :events
+                             {'identity
+                              {:permissions [:read]
+                               :data       :identity
+                               :arguments   {:cb :event}}
+                              'alert
+                              {:permissions [:read]
+                               :data       :alert
+                               :arguments   {:value :string}}}}}
+               m))
 
 (defn render-extension [m el el-errors]
   (let [{:keys [data errors]} (parse m)]
@@ -63,7 +59,7 @@
     (render (get-in data [:hooks :main :demo :parsed :view]) el)))
 
 (defn read-extension [o el el-errors]
-  (let [{:keys [data errors]} (reader/read (:content o))]
+  (let [{:keys [data errors]} (pluto/read (:content o))]
     (render-extension data el el-errors)))
 
 (defn render-result [{:keys [type value]} el el-errors]

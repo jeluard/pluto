@@ -1,7 +1,6 @@
 (ns pluto.reader.views
   (:require [clojure.spec.alpha     :as spec]
             #?(:cljs [reagent.core  :as reagent])
-            [re-frame.core          :as re-frame]
             [pluto.reader.blocks    :as blocks]
             [pluto.reader.errors    :as errors]
             [pluto.reader.reference :as reference]
@@ -42,7 +41,7 @@
 (defn- resolve-component [ctx ext [element :as o]]
   (cond
     (block? element) element
-    (symbol? element) (or (get-in ctx [:capacities :components element :value])
+    (symbol? element) (or (get-in ctx [:capacities :components element :data])
                           ; First resolve using default components then lookup for local views
                           ;; TODO handle errors
                           (:data (types/resolve ctx ext :view o)))))
@@ -135,7 +134,7 @@
     (when event
       (let [{:keys [data errors]} (types/resolve ctx ext :event event)]
         (when data
-          (re-frame/dispatch (data {:a (f o)})))))))
+          (data {:a (f o)}))))))
 
 #?(:cljs
     (defn default-logger [err info]
@@ -208,7 +207,5 @@
 (defmethod types/resolve :view [ctx ext type value]
   (let [{:keys [data errors]} (reference/resolve ctx ext type value)]
     (if data
-      (if (fn? data)
-        {:data data}
-        (parse ctx ext data))
+      (parse ctx ext data)
       {:errors errors})))

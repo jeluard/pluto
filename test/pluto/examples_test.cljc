@@ -1,7 +1,7 @@
 (ns pluto.examples-test
   (:refer-clojure :exclude [read])
   (:require [clojure.test :refer [is deftest]]
-            [pluto.reader :as reader]
+            [pluto.core :as reader]
             #?(:cljs [pluto.utils-test :include-macros true :refer [slurp]])))
 
 (deftest examples

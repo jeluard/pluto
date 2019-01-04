@@ -6,6 +6,7 @@
                    ::invalid-meta
                    ::invalid-key
                    ::invalid-value
+                   ::existing-key
                    ;; Types
                    ::invalid-type
                    ::invalid-type-name
@@ -20,7 +21,6 @@
                    ::invalid-bindings
                    ::invalid-bindings-format
                    ::missing-property
-                   ::missing-keys
                    ::unknown-reference
                    ::unknown-reference-type
                    ::missing-reference-arguments
