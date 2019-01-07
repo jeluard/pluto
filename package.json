@@ -1,0 +1,26 @@
+{
+  "name": "@status-im/pluto",
+  "version": "0.2.0",
+  "description": "A library for building status extensions",
+  "main": "npm/pluto.node.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/status-im/pluto.git"
+  },
+  "keywords": [
+    "status",
+    "pluto",
+    "clojure",
+    "clojurescript",
+    "dapp",
+    "ethereum",
+    "blockchain",
+    "decentralized"
+  ],
+  "author": "jelurad",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/status-im/pluto/issues"
+  },
+  "homepage": "https://github.com/status-im/pluto#readme"
+}
