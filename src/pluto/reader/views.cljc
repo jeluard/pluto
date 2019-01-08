@@ -155,7 +155,7 @@
     (if data
       (if (fn? data)
         {:data data}
-        (let [{:keys [data errors] :as m} (parse ctx ext data)]
+        (let [{:keys [data errors]} (parse ctx ext data)]
           ;; TODO Might fail at runtime if destructuring is incorrect
           (errors/merge-errors (when data {:data (fn [o] (hiccup-with-properties data o))})
                                (concat errors (:errors ext)))))

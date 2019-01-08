@@ -5,6 +5,7 @@
             [pluto.reader          :as reader]
             [pluto.reader.hooks    :as hooks]
             [pluto.storages        :as storages]
+            [pluto.web.editor.markdown :as mk]
             pluto.reader.views
             [reagent.core          :as reagent]
             [reagent.dom           :as dom]
