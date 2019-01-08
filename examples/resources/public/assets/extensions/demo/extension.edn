@@ -34,4 +34,4 @@
     (for [{nm :nm} users]
       [view
         (for [{nm2 :nm} users]
-          [view nm " and " nm2])])])}
+          [text nm " and " nm2])])])}

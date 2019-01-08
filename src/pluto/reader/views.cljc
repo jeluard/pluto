@@ -1,9 +1,7 @@
 (ns pluto.reader.views
   (:require [clojure.spec.alpha         :as spec]
             [pluto.reader.blocks        :as blocks]
-            [pluto.reader.destructuring :as destructuring]
             [pluto.reader.errors        :as errors]
-            [pluto.reader.permissions   :as permissions]
             [pluto.reader.reference     :as reference]
             [pluto.reader.types         :as types]
             [pluto.utils                :as utils]))

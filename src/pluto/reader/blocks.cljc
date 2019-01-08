@@ -1,11 +1,8 @@
 (ns pluto.reader.blocks
-  (:require [clojure.string             :as string]
-            [clojure.walk               :as walk]
-            [clojure.spec.alpha         :as spec]
+  (:require [clojure.walk               :as walk]
             [re-frame.core              :as re-frame]
             [pluto.reader.destructuring :as destructuring]
             [pluto.reader.errors        :as errors]
-            [pluto.reader.permissions   :as permissions]
             [pluto.reader.types         :as types]
             [pluto.utils                :as utils]))
 
@@ -73,11 +70,11 @@
                         [x (assoc props :prev-env new-env) children])
                       children)))
 
-(defn for-block [{:keys [wrapper-component prev-env bindings wrap?]} children]
+(defn for-block [{:keys [prev-env bindings]} children]
   (let [[k v] bindings
         for-values (resolve-rhs prev-env v)]
     (when (sequential? for-values)
-      (into (if true [wrapper-component {}] (list))
+      (into (if true [:<> {}] (list))
             (for [val for-values]
               (let-block {:prev-env prev-env :bindings [k val]}
                 children))))))
@@ -138,16 +135,10 @@
         (not ((some-fn symbol? map?) (first binding))))
     {:errors [(errors/error ::errors/invalid-for-binding binding)]}
     :else
-    (let [wrapper-component (get-in ctx [:capacities :components 'view :value])
-          {:keys [errors data]} (resolve-and-validate-queries ctx ext binding)
-          errors (cond-> errors
-                   (nil? wrapper-component)
-                   (conj errors (errors/error ::errors/unknown-component 'wrapper-component)))]
+    (let [{:keys [errors data]} (resolve-and-validate-queries ctx ext binding)]
       (if (not-empty errors)
         {:errors errors}
-        {:data [for-block {:bindings data
-                           :wrapper-component wrapper-component
-                           :wrap? (list? (last body))}
+        {:data [for-block {:bindings data}
                 (last body)]}))))
 
 (defn when-block [{:keys [test]} body]
@@ -183,4 +174,4 @@
       {:errors errors}
       {:data (apply conj [if-block {:test test}] (list then else))})))
 
-(defmethod parse :default [ctx ext block] {:errors [{:type :unknown-block-type :ctx ctx :block block}]})
+(defmethod parse :default [ctx _ block] {:errors [{:type :unknown-block-type :ctx ctx :block block}]})
