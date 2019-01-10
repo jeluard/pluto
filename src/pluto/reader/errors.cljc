@@ -36,7 +36,8 @@
                    ::invalid-when-block                   
                    ::unsupported-test-type
                    ::invalid-local-event
-                   ::unresolved-properties})
+                   ::unresolved-properties
+                   ::invalid-placeholders})
 
 (spec/def ::value any?)
 

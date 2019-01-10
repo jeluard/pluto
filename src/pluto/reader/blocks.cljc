@@ -19,7 +19,7 @@
   (fn [ctx ext [type]] type))
 
 (defn substitute-query-values [m v]
-  (walk/prewalk #(or (get m %) (when (string? %) (utils/interpolate m %)) %) v))
+  (walk/prewalk #(or (get m %) (when (string? %) (:data (utils/interpolate m %))) %) v))
 
 (defn- query? [binding-value]
   (and (vector? binding-value)
@@ -48,7 +48,7 @@
 (defn replace-atom [values o]
   (cond (contains? values o) (get values o)
         (symbol? o) nil
-        (string? o) (utils/interpolate values o)
+        (string? o) (:data (utils/interpolate values o))
         (and (fn? o) (:event (meta o))) #(o % values) ;; Intercept events and inject the env. TODO remove this hack
         :else (walk/postwalk-replace values o)))
 

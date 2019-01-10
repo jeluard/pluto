@@ -6,5 +6,5 @@
 
 (deftest examples
   (is (empty? (:errors (reader/parse {:capacities {:hooks {:main {:properties {}}}}}
-                          (:data (reader/read (slurp "figwheel/resources/public/assets/extensions/demo/extension.edn"))))))))
+                          (:data (reader/read (slurp "examples/resources/public/assets/extensions/demo/extension.edn"))))))))
 

@@ -123,7 +123,7 @@
 (defn replace-atom [env o]
   (cond (contains? env o) (get env o)
         (symbol? o) nil
-        (string? o) (utils/interpolate env o)
+        (string? o) (:data (utils/interpolate env o))
         (fn? o) #(o % env)
         :else (walk/postwalk-replace env o)))
 

@@ -66,7 +66,7 @@
                              {:permissions [:read]
                               :value       :extensions/json-parse
                               :arguments   {:value      :number}}
-                            'json/parse
+                             'json/parse
                              {:permissions [:read]
                               :value       :log
                               :arguments   {:value :string}}
