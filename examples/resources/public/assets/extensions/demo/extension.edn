@@ -15,9 +15,11 @@
    [identity {:cb [my-alert {:arg value :value "%% ${v}"}]}])
 
  views/local-view
- (let [{name :name color :color} properties]
-   [text {:style {:color color}}
-    name])
+ {:component-did-mount [alert {:value "Mount!!"}]
+  :view
+  (let [{name :name color :color} properties]
+    [text {:style {:color color}}
+     name])}
 
  views/main
  (let [{name :name users :users}   properties

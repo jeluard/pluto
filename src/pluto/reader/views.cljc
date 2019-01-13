@@ -1,10 +1,13 @@
 (ns pluto.reader.views
-  (:require [clojure.spec.alpha         :as spec]
-            [pluto.reader.blocks        :as blocks]
-            [pluto.reader.errors        :as errors]
-            [pluto.reader.reference     :as reference]
-            [pluto.reader.types         :as types]
-            [pluto.utils                :as utils]))
+  (:require [clojure.walk           :as walk]
+            [clojure.spec.alpha     :as spec]
+            #?(:cljs [reagent.core  :as reagent])
+            [re-frame.core          :as re-frame]
+            [pluto.reader.blocks    :as blocks]
+            [pluto.reader.errors    :as errors]
+            [pluto.reader.reference :as reference]
+            [pluto.reader.types     :as types]
+            [pluto.utils            :as utils]))
 
 (spec/def ::form
   (spec/or
@@ -24,7 +27,7 @@
 
 (declare parse)
 
-(defn parse-hiccup-children [ctx ext children]
+(defn- parse-hiccup-children [ctx ext parent children]
   (reduce #(let [{:keys [data errors]} (parse ctx ext %2)]
              (errors/merge-errors (update %1 :data conj data)
                                   errors))
@@ -33,11 +36,16 @@
 (defn component? [o]
   (symbol? o))
 
+(defn- block? [o]
+  ;; TODO better abstract blocks
+  (fn? o))
+
 (defn- resolve-component [ctx ext [element :as o]]
   (cond
-    (fn? element) element ;; TODO better abstract blocks
+    (block? element) element
     (symbol? element) (or (get-in ctx [:capacities :components element :value])
                           ; First resolve using default components then lookup for local views
+                          ;; TODO handle errors
                           (:data (types/resolve ctx ext :view o)))))
 
 (defmulti resolve-default-component-properties
@@ -90,7 +98,7 @@
      (not (nil? properties?)) (cons properties? children)
      :else children)])
 
-(defn- parse-hiccup-element [ctx ext o]
+(defn parse-hiccup-element [ctx ext o]
   (let [explain
         (if (vector? o) ;; this eliminates spec explain data noise
           (spec/explain-data ::element o)
@@ -107,7 +115,7 @@
             [properties children]            (resolve-properties-children properties-children)
             {:keys [data errors]}            (when properties
                                                (resolve-component-properties ctx ext element properties))]
-        (cond-> (let [m (parse-hiccup-children ctx ext children)]
+        (cond-> (let [m (parse-hiccup-children ctx ext o children)]
                   ;; Reduce parsed children to a single map and wrap them in a hiccup element
                   ;; whose component has been translated to the local platform
                   (if component (update m :data #(apply conj (if data [component data] [component]) %)) m))
@@ -123,18 +131,56 @@
       (reduce #(apply conj %1 (unresolved-properties acc %2)) acc children))
     :else acc))
 
-(defn parse [ctx ext o]
-  (if (list? o)
-    (let [{:keys [data errors]} (blocks/parse ctx ext o)]
-      (if data
-        (let [d     (parse ctx ext data)
-              props (reduce unresolved-properties #{} d)]
-          (errors/merge-errors
-            d
-            (concat errors (when (seq props)
-                             {:errors [(errors/error ::errors/unresolved-properties props)]}))))
-        {:errors errors}))
-    (parse-hiccup-element ctx ext o)))
+(defn event->fn [ctx ext event f]
+  (fn [o]
+    (when event
+      (let [{:keys [data errors]} (types/resolve ctx ext :event event)]
+        (when data
+          (re-frame/dispatch (data {:a (f o)})))))))
+
+(defn keyword-map->symbol-map [m]
+
+  (reduce-kv #(assoc %1 (symbol (name %2)) %3) {} m))
+
+(defn- create-reagent-spec [ctx ext {:keys [get-initial-state component-will-receive-props should-component-update
+                                            component-will-mount component-did-mount component-will-update
+                                            component-did-update component-will-unmount view]}]
+  (let [{:keys [data errors] :as m} (parse ctx ext view)]
+    (if errors
+      m
+      #?(:cljs
+          {:data
+           (merge {:display-name   (str (first data))
+                   :reagent-render #(walk/postwalk-replace (keyword-map->symbol-map %) data)}
+             (when get-initial-state {:get-initial-state-mount (event->fn ctx ext get-initial-state #(js->clj %))})
+             (when component-will-receive-props {:component-will-receive-props (event->fn ctx ext component-will-receive-props #(assoc (js->clj %1) :new %2))})
+             (when should-component-update {:should-component-update (event->fn ctx ext should-component-update #(assoc (js->clj %1) :old %2 :new %3))})
+             (when component-will-mount {:component-will-mount (event->fn ctx ext component-will-mount #(js->clj %))})
+             (when component-did-mount {:component-did-mount (event->fn ctx ext component-did-mount #(js->clj %))})
+             (when component-will-update {:component-will-update (event->fn ctx ext component-will-update #(assoc (js->clj %1) :new %2))})
+             (when component-did-update {:component-did-update (event->fn ctx ext component-did-update #(assoc (js->clj %1) :old %2))})
+             (when component-will-unmount {:component-will-unmount (event->fn ctx ext component-will-unmount #(js->clj %))}))}))))
+
+(defn parse
+  ([ctx ext o]
+   (if (map? o)
+     (let [{:keys [data errors] :as m} (create-reagent-spec ctx ext o)]
+       (if errors
+         m
+         #?(:cljs {:data (reagent/create-class data)})))
+     (parse ctx ext nil o)))
+  ([ctx ext parent o]
+   (if (list? o)
+     (let [{:keys [data errors]} (blocks/parse ctx ext parent o)]
+       (if data
+         (let [d     (parse ctx ext o data)
+               props (reduce unresolved-properties #{} d)]
+           (errors/merge-errors
+             d
+             (concat errors (when (seq props)
+                              {:errors [(errors/error ::errors/unresolved-properties props)]}))))
+         {:errors errors}))
+     (parse-hiccup-element ctx ext o))))
 
 (defn- hiccup-with-properties [h properties]
   (if (vector? h)

@@ -13,7 +13,7 @@
 
 (defmulti parse
   "Parse a block element. Return hiccup data."
-  (fn [ctx ext [type]] type))
+  (fn [ctx ext parent [type]] type))
 
 (defn substitute-query-values [m v]
   (walk/prewalk #(or (get m %) (when (string? %) (:data (utils/interpolate m %))) %) v))
@@ -115,9 +115,11 @@
              (mapcat destructuring/validate-destructure-bindings)))))
     [(errors/error ::errors/invalid-bindings-format bindings)]))
 
-(defmethod parse 'let [ctx ext [_ bindings & body]]
-  ;; TODO fail if some symbol are not defined in the env
-  (if (not= 1 (count body))
+(defn- valid-let-block? [body]
+  (= 1 (count body)))
+
+(defmethod parse 'let [ctx ext parent [_ bindings & body]]
+  (if-not (valid-let-block? body)
     {:errors [(errors/error ::errors/invalid-let-body {:value body})]}
     (let [binding-errors (validate-bindings bindings)]
       (if (not-empty binding-errors)
@@ -127,7 +129,7 @@
             {:errors errors}
             {:data [let-block {:bindings data} (last body)]}))))))
 
-(defmethod parse 'for [ctx ext [_ binding & body]]
+(defmethod parse 'for [ctx ext parent [_ binding & body]]
   (cond
     (not= 1 (count body))
     {:errors [(errors/error ::errors/invalid-for-body body)]}
@@ -144,7 +146,7 @@
 (defn when-block [{:keys [test]} body]
   (when test body))
 
-(defmethod parse 'when [_ _ [_ test & body :as parts]]
+(defmethod parse 'when [_ _ _ [_ test & body :as parts]]
   (let [errors (cond-> nil
                  (not (symbol? test))
                  (conj (errors/error ::errors/unsupported-test-type test))
@@ -159,7 +161,7 @@
     (first body)
     (second body)))
 
-(defmethod parse 'if [_ _ [_ test then else :as parts]]
+(defmethod parse 'if [_ _ _ [_ test then else :as parts]]
   (let [parts-count (count (rest parts))
         errors (cond-> nil
                  (not (symbol? test))
