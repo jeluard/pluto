@@ -1,0 +1,5 @@
+^{:watch-dirs ["src"]
+  :log-file "figwheel-main.log"
+  :log-level :info}
+{:main pluto.playground.figwheel}
+

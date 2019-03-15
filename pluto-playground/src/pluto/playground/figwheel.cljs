@@ -1,7 +1,7 @@
-(ns ^:figwheel-hooks pluto.figwheel
+(ns ^:figwheel-hooks pluto.playground.figwheel
   (:require [re-frame.core :as re-frame]
             [devtools.core :as devtools]
-            pluto.examples))
+            pluto.playground.core))
 
 (enable-console-print!)
 (devtools/install!)

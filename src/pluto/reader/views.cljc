@@ -198,20 +198,21 @@
           (fn [o]
             [error-boundary ctx
              (inject-properties data o)])}))))
-  ([ctx ext parent o]
-   (if (list? o)
-     (let [{:keys [data errors]} (blocks/parse ctx ext parent o)]
-       (if errors
-         {:errors errors}
-         (let [d     (parse ctx ext o data)
-               ;; TODO Properly introduce `bindings` at top parsing level, not in blocks
-               props (set/difference (reduce unresolved-properties #{} d)
-                                     (bindings data))]
-           (errors/merge-errors
-             d
-             (when (seq props)
-               [(errors/error ::errors/unresolved-properties props)])))))
-     (parse-hiccup-element ctx ext o))))
+  ([{:keys [view-fn] :as ctx} ext {:keys [path] :as parent-ctx} o]
+   ((if view-fn #(view-fn parent-ctx %) identity)
+    (if (list? o)
+      (let [{:keys [data errors]} (blocks/parse ctx ext parent-ctx o)]
+        (if errors
+          {:errors errors}
+          (let [d     (parse ctx ext {:parent o :path (conj path 0)} data)
+                ;; TODO Properly introduce `bindings` at top parsing level, not in blocks
+                props (set/difference (reduce unresolved-properties #{} d)
+                         (bindings data))]
+            (errors/merge-errors
+              d
+              (concat errors (when (seq props)
+                               {:errors [(errors/error ::errors/unresolved-properties props)]}))))))
+      (parse-hiccup-element ctx ext parent-ctx o)))))
 
 (defmethod types/resolve :view [ctx ext type value]
   (let [{:keys [data errors]} (reference/resolve ctx ext type value)]

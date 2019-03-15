@@ -40,6 +40,8 @@
  (let [{name :name users :users}   properties
        {cond? :cond?} [random-boolean]]
    [view
+    [text "1"]
+    [text "2"]
     ;[local-view {:name "Hey!! ${name}" :color :red :level :polite}]
     [button {:on-click [cb {:arg name :value "AA"}]}
      "Click!"]

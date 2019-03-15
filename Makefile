@@ -1,7 +1,10 @@
 .PHONY = tests
 
-dev:
-	clojure -A:examples
+compile:
+	lein cljsbuild once
+
+install:
+	lein install
 
 tests:
 	clojure -A:test-clj

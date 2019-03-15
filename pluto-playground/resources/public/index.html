@@ -1,0 +1,72 @@
+<html>
+<head>
+    <link rel="stylesheet" href="assets/css/cm.css">
+    <style>
+        .CodeMirror {
+          height: 100%;
+        }
+
+        body {
+          display: flex;
+        }
+
+        main {
+          width: 60%;
+        }
+
+        #content {
+          display: flex;
+          flex: auto;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          height: 70%;
+        }
+
+        #selection {
+          padding: 10px;
+        }
+
+        #extension {
+           border: 40px solid #ddd;
+           border-width: 55px 7px;
+           border-radius: 40px;
+           margin: 50px 100px;
+           width: 30vh;
+           height: 50vh;
+           overflow: hidden;
+        }
+
+        .selected {
+          border: red 1px solid;
+        }
+
+        #right {
+            width: 20%;
+            padding-left: .5rem;
+            margin-left: .5rem;
+            float: right;
+            color: #29627e;
+        }
+
+        #left {
+            width: 20%;
+            padding-left: .5rem;
+            margin-left: .5rem;
+            float: left;
+            color: #29627e;
+        }
+
+        .section {
+          margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>
+
+<script src="cljs-out/dev-main.js"></script>
+<script>
+  pluto.playground.core.bootstrap("url@assets/extensions/demo");
+</script>

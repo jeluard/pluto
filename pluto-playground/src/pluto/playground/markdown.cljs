@@ -1,5 +1,6 @@
-(ns pluto.web.editor.markdown
-  (:require [clojure.tools.reader.edn :as edn]))
+(ns pluto.playground.markdown
+  (:require [clojure.edn :as edn]
+            [cljsjs.marked]))
 
 (defn markdown->edn [s]
   (when s

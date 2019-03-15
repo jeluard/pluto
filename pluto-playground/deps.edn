@@ -1,0 +1,17 @@
+{:deps {org.clojure/clojurescript  {:mvn/version "1.10.520"}
+        status-im/pluto            {:mvn/version "iteration-4-8-SNAPSHOT"}
+        status-im/pluto-web        {:mvn/version "0.1-SNAPSHOT"}
+        reagent                    {:mvn/version "0.8.1"}
+        re-frame                   {:mvn/version "0.10.6"}
+        cljsjs/codemirror          {:mvn/version "5.40.2-1"}
+        cljsjs/parinfer            {:mvn/version "3.11.0-0"}
+        cljsjs/parinfer-codemirror {:mvn/version "1.4.1-2"}
+        cljsjs/material-ui         {:mvn/version "3.9.1-0"}
+        cljsjs/marked              {:mvn/version "0.3.5-1"}
+        cljsjs/kjua                {:mvn/version "0.1.1-1"}}
+ :paths ["src"]
+ :aliases {:examples {:extra-paths ["src" "resources" "target"]
+                      :extra-deps  {com.bhauman/figwheel-main       {:mvn/version "0.2.0"}
+                                    com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                                    binaryage/devtools              {:mvn/version "0.9.10"}}
+                      :main-opts   ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
